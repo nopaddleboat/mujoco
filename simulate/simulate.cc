@@ -1606,11 +1606,12 @@ namespace mujoco {
 namespace mju = ::mujoco::sample_util;
 
 Simulate::Simulate(std::unique_ptr<PlatformUIAdapter> platform_ui,
-                   mjvScene* scn, mjvCamera* cam,
+                   mjvScene* scn, mjvScene* scn_geo, mjvCamera* cam,
                    mjvOption* opt, mjvPerturb* pert,
                    bool fully_managed)
     : fully_managed_(fully_managed),
       scn(*scn),
+      scn_geo(*scn_geo),
       cam(*cam),
       opt(*opt),
       pert(*pert),
@@ -2410,6 +2411,10 @@ void Simulate::RenderLoop() {
       } else {
         scnstate_.data.warning[mjWARN_VGEOMFULL].number += mjv_updateSceneFromState(
             &scnstate_, &this->opt, &this->pert, &this->cam, mjCAT_ALL, &this->scn);
+        if(this->scn_geo.ngeom>0){
+          memcpy(this->scn.geoms+this->scn.ngeom, this->scn_geo.geoms, sizeof(mjvGeom) * this->scn_geo.ngeom);
+          this->scn.ngeom+=this->scn_geo.ngeom;
+        }        
       }
     }  // MutexLock (unblocks simulation thread)
 

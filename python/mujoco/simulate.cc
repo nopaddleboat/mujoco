@@ -68,16 +68,18 @@ class UIAdapterWithPyCallback : public Adapter {
 class SimulateWrapper {
  public:
   SimulateWrapper(std::unique_ptr<PlatformUIAdapter> platform_ui_adapter,
-                  py::object scn, py::object cam, py::object opt,
+                  py::object scn, py::object scn_geo, py::object cam, py::object opt,
                   py::object pert, bool fully_managed)
       : simulate_(new mujoco::Simulate(
             std::move(platform_ui_adapter), scn.cast<MjvSceneWrapper&>().get(),
+            scn_geo.cast<MjvSceneWrapper&>().get(),
             cam.cast<MjvCameraWrapper&>().get(),
             opt.cast<MjvOptionWrapper&>().get(),
             pert.cast<MjvPerturbWrapper&>().get(), fully_managed)),
         m_(py::none()),
         d_(py::none()),
         scn_(scn),
+        scn_geo_(scn_geo),
         cam_(cam),
         opt_(opt),
         pert_(pert) {}
@@ -127,6 +129,7 @@ class SimulateWrapper {
   py::object m_;
   py::object d_;
   py::object scn_;
+  py::object scn_geo_;
   py::object cam_;
   py::object opt_;
   py::object pert_;
@@ -192,13 +195,13 @@ PYBIND11_MODULE(_simulate, pymodule) {
 
   py::class_<SimulateWrapper>(pymodule, "Simulate")
       .def_readonly_static("MAX_GEOM", &mujoco::Simulate::kMaxGeom)
-      .def(py::init([](py::object scn, py::object cam, py::object opt,
+      .def(py::init([](py::object scn, py::object scn_geo, py::object cam, py::object opt,
                        py::object pert, bool fully_managed,
                        py::object key_callback) {
         return std::make_unique<SimulateWrapper>(
             std::make_unique<UIAdapterWithPyCallback<mujoco::GlfwAdapter>>(
                 key_callback),
-            scn, cam, opt, pert, fully_managed);
+            scn, scn_geo, cam, opt, pert, fully_managed);
       }))
       .def("destroy", &SimulateWrapper::Destroy,
            py::call_guard<py::gil_scoped_release>())

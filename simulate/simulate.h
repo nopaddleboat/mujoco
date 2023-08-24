@@ -51,7 +51,7 @@ class Simulate {
   // create object and initialize the simulate ui
   Simulate(
       std::unique_ptr<PlatformUIAdapter> platform_ui_adapter,
-      mjvScene* scn, mjvCamera* cam,
+      mjvScene* scn, mjvScene* scn_geo, mjvCamera* cam,
       mjvOption* opt, mjvPerturb* pert, bool fully_managed);
 
   // Synchronize mjModel and mjData state with UI inputs, and update
@@ -212,6 +212,7 @@ class Simulate {
 
   // abstract visualization
   mjvScene& scn;
+  mjvScene& scn_geo;
   mjvCamera& cam;
   mjvOption& opt;
   mjvPerturb& pert;
